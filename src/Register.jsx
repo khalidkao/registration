@@ -16,25 +16,62 @@ export const Register = (props) => {
         coagulationDisorders: false,
         highRiskSexualPractices: false,
     });
+    const [errors, setErrors] = useState([]);
+    const validate = () => {
+        const error ={};
+
+        if(!email){
+            error.email ="Email is Required";}
+        else if(!/\S+@\S+\.\S+/.test(email)){
+            error.email="Email not Matched";
+        }  else{
+            error.email="";
+        }  
+        if(!pass){
+            error.pass ="Password is Required";}
+        else if(pass.length<8){
+            error.pass="Password more than 8 Character";
+        }  else{
+            error.pass="";
+        }    
+        const numericAge = parseInt(age, 10); 
+        if(!age){
+            error.age ="age is Required";}
+        else if(numericAge < 18 || numericAge >= 65){
+            error.age="Your age must be between 18-65";
+        }  else{
+            error.age="";
+        }  
+        if(!name){
+            error.name ="Name is Required";}
+            else{
+                error.name="";}
+        return error; 
+    }
 
     async function save(e) {
         e.preventDefault();
+        const errors=validate();
+        setErrors(errors);
+        const errorValues = Object.values(errors);
 
         // Vérifier si au moins une des conditions est cochée
         if (Object.values(conditions).some((condition) => condition)) {
             alert("Impossible de s'inscrire en raison de conditions médicales.");
             return;
         }
-        
+        else if (errorValues.length > 0 && errorValues.some((error) => error !== "")) {
+            console.log("Erreurs dans le formulaire :");
+            return;
+        }
 
         try {
-            await axios.post("http://localhost:8080/register", {
+            await axios.post("http://localhost:8888/users-registration/register", {
                 email: email,
-                nom: name,
-                prenom: name,
+                name: name,
                 password: pass,
-                bloodtype: groupeSanguin,
-                numerotele: age,
+                groupeSanguin: groupeSanguin,
+                age: age,
             });
 
             alert("Inscription réussie");
@@ -72,6 +109,7 @@ export const Register = (props) => {
                     id="name"
                     placeholder="Full Name"
                 />
+                {errors.name && <div className='error'>{errors.name}</div>}
                 <label htmlFor="email">Email</label>
                 <input
                     value={email}
@@ -81,6 +119,7 @@ export const Register = (props) => {
                     id="email"
                     name="email"
                 />
+                {errors.email && <div className='error'>{errors.email}</div>}
                 <label htmlFor="password">Password</label>
                 <input
                     value={pass}
@@ -90,6 +129,7 @@ export const Register = (props) => {
                     id="password"
                     name="password"
                 />
+                {errors.pass && <div className='error'>{errors.pass}</div>}
                 <label htmlFor="age">Age</label>
                 <input
                     value={age}
@@ -99,6 +139,7 @@ export const Register = (props) => {
                     id="age"
                     name="age"
                 />
+                {errors.age && <div className='error'>{errors.age}</div>}
                 <label htmlFor="groupeSanguin">Blood Type</label>
                 <select
                     value={groupeSanguin}
@@ -106,6 +147,7 @@ export const Register = (props) => {
                     id="groupeSanguin"
                     name="groupeSanguin"
                 >
+                    <option value="groupeSanguin">groupeSanguin</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
                     <option value="B+">B+</option>
